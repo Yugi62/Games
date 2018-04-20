@@ -12,55 +12,47 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody2D))]
 public abstract class Character : MonoBehaviour
 {
-    protected Animator m_Animator;                             //Init Animator
-    protected Rigidbody2D m_Rigidbody2D;                       //Init Rigidbody2D
+    protected Animator m_Animator;
+    protected Rigidbody2D m_Rigidbody2D;
+    protected ActionParam m_ActionParam;
 
     protected delegate void m_ActionDelegate(ActionParam actionParam);
     protected m_ActionDelegate m_ActionMethods;
 
-    //애니메이터 파라미터 리셋 메서드
-    protected abstract void ResetAnimatorParam();
-    //특정 조건에 따라 액션 메서드를 호출하는 메서드
-    //public abstract void Control();
+    protected LayerMask m_GroundLayer = (-1);               //땅 레이어(전체)
+    protected Transform m_GroundCheck;                      //땅 검사를 위한 값
+    protected bool m_IsGrounded;                            //땅에 닿는 여부
+    protected const float k_GroundedRadious = 0.01f;        //땅 검사 반지름
 
-    //공격 메서드(액션)
-    protected virtual void Attack()
-    {
-
-    }
-    //죽음 메서드(액션)
-    protected virtual void Dead()
-    {
-
-    }
-    //회전 메서드(액션)
-    protected void Flip(int direction)
-    {
-        if (direction != 0)
-            transform.localScale = new Vector3(direction, 1f, 1f);
-    }
-    //이동 메서드(액션)
-    protected void Move(int direction, float speed, string animation)
-    {
-        m_Animator.SetBool(animation, true);
-        m_Rigidbody2D.velocity = new Vector2(direction * speed, m_Rigidbody2D.velocity.y);     
-    }
-    //점프 메서드(액션)
-    protected void Jump(float speed, string animation)
-    {
-        m_Animator.SetBool(animation, true);
-        m_Rigidbody2D.AddForce(new Vector2(0, speed));
-    }
-    //낙하 메서드(액션)
-    protected void Fall(string animation)
-    {
-        m_Animator.SetBool(animation, true);
-    }
+    protected Transform m_CellingCheck;                     //천장 검사를 위한 값
+    protected bool m_IsCelling;                             //천장에 닿는 여부
+    protected const float k_CellingRadious = 0.3f;          //천장 검사 반지름
 
     protected virtual void Awake()
     {
         m_Animator = GetComponent<Animator>();              //컴포넌트 추가
         m_Rigidbody2D = GetComponent<Rigidbody2D>();        //컴포넌트 추가
         m_Rigidbody2D.freezeRotation = true;                //Z축 회전 방지
+        m_ActionParam = new ActionParam();
+
+        m_GroundCheck = transform.FindChild("GroundCheck");
+        m_CellingCheck = transform.FindChild("CellingCheck");
+    }
+
+    protected virtual void FixedUpdate()
+    {
+        m_IsGrounded = CheckOverlapCircle(m_GroundCheck, k_GroundedRadious, m_GroundLayer);
+        m_IsCelling = CheckOverlapCircle(m_CellingCheck, k_CellingRadious, m_GroundLayer);
+    }
+
+    protected bool CheckOverlapCircle(Transform transform, float radious, LayerMask layerMask)
+    {
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, radious, layerMask);
+        for (int i = 0; i < colliders.Length; i++)
+        {
+            if (colliders[i].gameObject != gameObject)
+                return true;
+        }
+        return false;
     }
 }
