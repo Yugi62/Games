@@ -4,10 +4,6 @@ using UnityEngine;
 
 public class PlayerCharacter : Character
 {
-    [SerializeField] private float m_MaxWalkSpeed = 4.0f;     //최대 걷기 속도
-    [SerializeField] private float m_MaxRunSpeed = 6.0f;      //최대 달리기 속도
-    [SerializeField] private float m_JumpForce = 250.0f;      //점프 높이
-
     public GameObject m_WallScratch;
 
     //사다리 영역 안에 있는가?
@@ -21,92 +17,50 @@ public class PlayerCharacter : Character
     protected override void Awake()
     {
         base.Awake();
-        m_Rigidbody2D.gravityScale = 3.0f;
-
-        //사용 가능 '행동 메서드' 목록
-        m_ActionMethods += Action.Flip;
-        m_ActionMethods += Action.Run;
-        m_ActionMethods += Action.Walk;
-        m_ActionMethods += Action.Jump;
-        m_ActionMethods += Action.WallClimb;
-        m_ActionMethods += Action.WallJump;
+        
     }
 
-    private void ResetAnimatorParam()
+
+}
+
+/*
+private void OnTriggerEnter2D(Collider2D collider2D)
+{
+    m_TriggeredCollider = collider2D;
+    Item item = collider2D.gameObject.GetComponent<Item>();
+
+    if (item != null)
     {
-        //정지 상태일 때 Idle로 복귀
-        if (m_IsGrounded && m_Animator.GetBool("Jumping"))
-            m_Animator.SetBool("Jumping", false);
-
-        if (m_IsGrounded && m_Animator.GetBool("WallClimbing"))
-            m_Animator.SetBool("WallClimbing", false);
-
-        if (m_Animator.GetBool("Walking"))
-            m_Animator.SetBool("Walking", false);
-
-        if (m_Animator.GetBool("Running"))
-            m_Animator.SetBool("Running", false);
-    }
-
-    public void Control(Key key)
-    {
-        ResetAnimatorParam();
-
-        m_ActionParam.m_Transform = transform;
-        m_ActionParam.m_Rigidbody2D = m_Rigidbody2D;
-        m_ActionParam.m_Animator = m_Animator;
-
-        m_ActionParam.m_Direction = key.m_Direction;
-        m_ActionParam.m_MaxRunSpeed = (key.m_Direction != 0 && key.m_LeftShift) ? m_MaxRunSpeed : 0f;
-        m_ActionParam.m_MaxWalkSpeed = (key.m_Direction != 0 && !key.m_LeftShift) ? m_MaxWalkSpeed : 0f;
-        m_ActionParam.m_JumpForce = (key.m_UpArrow) ? m_JumpForce : 0f;
-
-        m_ActionParam.m_IsGrounded = m_IsGrounded;
-             
-        m_ActionMethods(m_ActionParam);
-    }
-
-    private void OnTriggerEnter2D(Collider2D collider2D)
-    {
-        m_TriggeredCollider = collider2D;
-        Item item = collider2D.gameObject.GetComponent<Item>();
-
-        if (item != null)
+        if (item.GetId() == "Ladder")
         {
-            if (item.GetId() == "Ladder")
-            {
-                m_InLadder = true;
-            }
-        }
-    }
-
-    private void OnTriggerExit2D(Collider2D collider2D)
-    {
-        m_TriggeredCollider = null;
-        Item item = collider2D.gameObject.GetComponent<Item>();
-
-        if (item != null)
-        {
-            if (item.GetId() == "Ladder")
-            {
-                m_InLadder = false;
-
-                if (m_IsLaddered)
-                {
-                    m_Animator.SetBool("Climbing", false);
-                    m_Animator.speed = 1.0f;
-
-                    m_IsLaddered = false;
-                    m_GroundLayer = (-1);
-                }
-            }
+            m_InLadder = true;
         }
     }
 }
 
+private void OnTriggerExit2D(Collider2D collider2D)
+{
+    m_TriggeredCollider = null;
+    Item item = collider2D.gameObject.GetComponent<Item>();
 
+    if (item != null)
+    {
+        if (item.GetId() == "Ladder")
+        {
+            m_InLadder = false;
 
+            if (m_IsLaddered)
+            {
+                m_Animator.SetBool("Climbing", false);
+                m_Animator.speed = 1.0f;
 
+                m_IsLaddered = false;
+                m_GroundLayer = (-1);
+            }
+        }
+    }
+}
+*/
 
 /*
 
